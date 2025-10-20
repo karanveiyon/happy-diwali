@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Coiny&family=Festive&display=swap" rel="stylesheet">
+    <title>Happy Diwali — Wish</title>
+    <style>
+        :root {
+            --bg1: #030214;
+            --bg2: #0f1730;
+            --accent: #ffd54a;
+            --text-glow: 0 0 18px rgba(255, 197, 79, .95), 0 0 40px rgba(255, 140, 0, .55);
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            /* font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial; */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: radial-gradient(ellipse at 25% 10%, rgba(255, 215, 120, 0.03), transparent 10%),
+                linear-gradient(180deg, var(--bg1), var(--bg2) 60%);
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #tamLine {
+            font-family: "Coiny", system-ui;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        #engLine {
+            font-family: "Festive", cursive;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        button.wish {
+            background: linear-gradient(90deg, #ffb74d, #ff6f00);
+            border: 0;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(255, 115, 0, 0.12);
+            color: #111;
+            width: 100%;
+        }
+
+        /* ----------- UI bar at bottom ------------- */
+        .ui {
+            position: absolute;
+            left: 50%;
+            bottom: 16px;
+            transform: translateX(-50%);
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: auto;
+            gap: 10px;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.05));
+            padding: 10px 14px;
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(2, 2, 10, 0.6);
+            backdrop-filter: blur(6px);
+        }
+
+        .inp_div {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+        }
+
+        .ui input,
+        .ui button {
+            font-size: 16px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 0;
+            outline: none;
+        }
+
+        /* Canvas full screen */
+        canvas#fw {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            display: block;
+        }
+
+        /* Centered message after explosion */
+        .message {
+            position: absolute;
+            left: 50%;
+            top: 42%;
+            transform: translate(-50%, -50%) translateY(20px);
+            text-align: center;
+            pointer-events: none;
+            z-index: 35;
+            opacity: 0;
+        }
+
+        .msg-line {
+            font-size: clamp(28px, 4vw, 56px);
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            margin: 6px 0;
+            text-shadow: var(--text-glow);
+            color: #fff;
+            display: block;
+            filter: drop-shadow(0 6px 28px rgba(255, 120, 0, 0.12));
+        }
+
+        /* Glow + floating */
+        .message.show {
+            animation: popFade 650ms cubic-bezier(.18, .86, .4, 1) forwards,
+                floaty 4s ease-in-out 750ms infinite;
+        }
+
+        @keyframes popFade {
+            0% {
+                transform: translate(-50%, -50%) translateY(30px) scale(.98);
+                opacity: 0;
+            }
+
+            60% {
+                transform: translate(-50%, -50%) translateY(-6px) scale(1.04);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) translateY(0px) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes floaty {
+            0% {
+                transform: translate(-50%, -50%) translateY(0px);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) translateY(-6px);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) translateY(0px);
+            }
+        }
+
+        /* Sparkles around text */
+        .sparkles {
+            position: absolute;
+            left: 50%;
+            top: 40%;
+            transform: translateX(-50%);
+            width: min(900px, 86vw);
+            height: 260px;
+            pointer-events: none;
+            z-index: 34;
+            overflow: visible;
+        }
+
+        .spark {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff, transparent 60%), rgba(255, 255, 255, 0.95);
+            filter: blur(.6px);
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(.6);
+            animation: sparkPop 900ms cubic-bezier(.2, .9, .25, 1) forwards;
+        }
+
+        @keyframes sparkPop {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(.2);
+            }
+
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(.9);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(.6);
+            }
+        }
+
+        /* Back button */
+        .back {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 40;
+            display: none;
+            background: linear-gradient(90deg, #fff, #ffd54a);
+            border: 0;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #111;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 600px) {
+            .ui {
+                /* flex-direction: column; */
+                /* gap: 6px; */
+                width: 100%;
+                padding: 12px;
+
+            }
+
+            .inp_div {
+                display: flex;
+                flex-direction: column;
+                margin: auto;
+                align-items: center;
+                justify-content: center;
+
+                /* gap: 6px; */
+            }
+
+            .ui input,
+            .ui button {
+                width: 100%;
+                font-size: 16px;
+            }
+
+            .message {
+                top: 46%;
+            }
+
+            .sparkles {
+                height: 180px;
+                top: 42%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- UI -->
+    <div class="ui" id="uiPanel" aria-hidden="false">
+        <div class="inp_div">
+            <input class="name" id="nameInput" placeholder="Enter name to wish" aria-label="Name to wish" />
+            <button class="wish" id="wishBtn" aria-label="Wish">Wish</button>
+        </div>
+        <div class="share_div" style="text-align: center;">
+            <span class="hint">Share them the screenshots ❤️</span>
+            <br>
+            <span class="hint">With ❤️ Techscription</span>
+        </div>
+    </div>
+
+    <!-- Canvas for rockets + explosion -->
+    <canvas id="fw"></canvas>
+
+    <!-- Sparkles container -->
+    <div class="sparkles" id="sparkles" aria-hidden="true"></div>
+
+    <!-- Message -->
+    <div class="message" id="message" aria-live="polite" role="status">
+        <span class="msg-line" id="engLine">Happy Diwali, Friend!</span>
+        <span class="msg-line" id="tamLine" style="font-weight:700; font-size:clamp(18px,2.5vw,30px);">இனிய தீபாவளி
+            நல்வாழ்த்துக்கள்!</span>
+    </div>
+
+    <!-- Back button -->
+    <button class="back" id="backBtn">Back & Wish Again</button>
+
+    <script>
+        /* ----------- Canvas Fireworks (rocket + explode) ------------- */
+        const canvas = document.getElementById('fw');
+        const ctx = canvas.getContext('2d', { alpha: true });
+        let W = canvas.width = innerWidth;
+        let H = canvas.height = innerHeight;
+
+        window.addEventListener('resize', () => {
+            W = canvas.width = innerWidth;
+            H = canvas.height = innerHeight;
+        });
+
+        /* Arrays */
+        let rockets = [];
+        let particles = [];
+
+        /* Helpers */
+        function rand(min, max) { return Math.random() * (max - min) + min; }
+        function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
+        function hueFromColor(hex) {
+            // small mapping of our palette to approximate hue (not needed but keep)
+            return 0;
+        }
+
+        /* Rocket */
+        class Rocket {
+            constructor(x, targetY) {
+                this.x = x;
+                this.y = H + 10; // start from bottom
+                this.vy = - (rand(6, 10));
+                this.vx = rand(-1.2, 1.2);
+                this.targetY = targetY;
+                this.color = ['#FF3B30', '#FFCC00', '#34C759', '#0A84FF', '#AF52DE'][randInt(0, 4)];
+                this.trail = [];
+            }
+            update() {
+                // leave a short trail
+                this.trail.push({ x: this.x, y: this.y });
+                if (this.trail.length > 6) this.trail.shift();
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.12; // gravity effect slowing upward velocity
+                // check if reached explosion point (vy > 0 or y <= targetY)
+                return (this.vy >= 0 || this.y <= this.targetY);
+            }
+            draw() {
+                // rocket glow
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x - 2, this.y - 10, 4, 10);
+                ctx.closePath();
+                // trail
+                for (let i = 0; i < this.trail.length; i++) {
+                    const t = this.trail[i];
+                    const a = (i + 1) / this.trail.length;
+                    ctx.globalAlpha = 0.12 * a;
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(t.x - 1.5, t.y - 1.5, 3, 3);
+                }
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        /* Particle from explosion */
+        class Particle {
+            constructor(x, y, color, angle, speed, life = 80) {
+                this.x = x; this.y = y;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.color = color;
+                this.alpha = 1;
+                this.life = life;
+                this.age = 0;
+            }
+            update() {
+                this.age++;
+                this.x += this.vx;
+                this.y += this.vy;
+                // gravity & drag
+                this.vy += 0.06;
+                this.vx *= 0.995;
+                this.vy *= 0.998;
+                this.alpha = Math.max(0, 1 - (this.age / this.life));
+                return this.alpha > 0;
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, 2, 2);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        /* Launch + explode helpers */
+        function launchAt(x) {
+            const targetY = rand(H * 0.12, H * 0.45);
+            rockets.push(new Rocket(x, targetY));
+        }
+
+        // explode — spawn many particles and a short canvas flash
+        function explodeAt(x, y, color) {
+            const count = randInt(60, 140);
+            for (let i = 0; i < count; i++) {
+                const angle = rand(0, Math.PI * 2);
+                const speed = rand(1.8, 6.5) * (Math.random() < 0.2 ? 0.6 : 1); // mix of slow/fast
+                particles.push(new Particle(x + rand(-6, 6), y + rand(-6, 6), color, angle, speed, randInt(80, 140)));
+            }
+            // also a faint flash
+            ctx.fillStyle = 'rgba(255,255,255,0.04)';
+            ctx.fillRect(0, 0, W, H);
+        }
+
+        /* Animation loop */
+        let lastTime = 0;
+        function loop(t) {
+            requestAnimationFrame(loop);
+            // easy fps-independent fade background to create trailing effect
+            ctx.fillStyle = 'rgba(2,2,8,0.16)';
+            ctx.fillRect(0, 0, W, H);
+
+            // update rockets
+            for (let i = rockets.length - 1; i >= 0; i--) {
+                const r = rockets[i];
+                r.draw();
+                const done = r.update();
+                if (done) {
+                    explodeAt(r.x, r.y, r.color);
+                    rockets.splice(i, 1);
+                }
+            }
+
+            // update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                const alive = p.update();
+                if (!alive) { particles.splice(i, 1); continue; }
+                p.draw();
+            }
+        }
+        requestAnimationFrame(loop);
+
+        /* User interactions */
+        const uiPanel = document.getElementById('uiPanel');
+        const nameInput = document.getElementById('nameInput');
+        const wishBtn = document.getElementById('wishBtn');
+        const backBtn = document.getElementById('backBtn');
+        const message = document.getElementById('message');
+        const engLine = document.getElementById('engLine');
+        const tamLine = document.getElementById('tamLine');
+        const sparkles = document.getElementById('sparkles');
+
+        let showBackTimeout = null;
+        let autoLaunchInterval = null;
+
+        function playSequenceFor(name) {
+            // hide UI
+            uiPanel.style.display = 'none';
+            // clear message + sparkles
+            hideMessageImmediate();
+
+            // Launch a few rockets aiming to center area, then final large explosion near center
+            const centerX = W / 2 + rand(-120, 120);
+            const bigTargetY = H * rand(0.22, 0.36);
+
+            // fire 3 small rockets preceding final rocket
+            const delays = [0, 350, 700, 1200];
+            delays.forEach((d, idx) => {
+                setTimeout(() => {
+                    // smaller rockets spread: either near left/right or center
+                    const x = centerX + rand(-240, 240);
+                    launchAt(x);
+                    // play small "pop" by creating a few particles immediately on top for visual burst (optional)
+                    if (idx === delays.length - 1) {
+                        // final rocket triggered slightly later: we launch near center and then the rocket code will explode
+                        launchAt(centerX);
+                    }
+                }, d);
+            });
+
+            // show message shortly after big explosion time.
+            // We'll wait 1600ms after initial to give rockets time to reach explosion and for particles to be visible.
+            setTimeout(() => {
+                showMessageWithName(name);
+            }, 1800);
+        }
+
+        function showMessageWithName(name) {
+            engLine.textContent = `Happy Diwali, ${name}!`;
+            tamLine.textContent = `இனிய தீபாவளி நல்வாழ்த்துக்கள், ${name}!`;
+            // create sparkles around the text (random positions)
+            createSparkles(28);
+
+            // reveal message with animations
+            message.classList.add('show');
+
+            // after 3s show back button
+            if (showBackTimeout) clearTimeout(showBackTimeout);
+            showBackTimeout = setTimeout(() => {
+                backBtn.style.display = 'block';
+            }, 3000);
+        }
+
+        function hideMessageImmediate() {
+            message.classList.remove('show');
+            backBtn.style.display = 'none';
+            // remove existing sparkles
+            while (sparkles.firstChild) sparkles.removeChild(sparkles.firstChild);
+        }
+
+        /* sparkles generator - creates small absolutely positioned nodes that animate and fade */
+        function createSparkles(n) {
+            while (sparkles.firstChild) sparkles.removeChild(sparkles.firstChild);
+            const rect = message.getBoundingClientRect();
+            // area roughly around the message
+            const areaLeft = rect.left - 60;
+            const areaTop = rect.top - 30;
+            const areaW = rect.width + 120;
+            const areaH = rect.height + 80;
+
+            for (let i = 0; i < n; i++) {
+                const s = document.createElement('div');
+                s.className = 'spark';
+                // random position in area
+                const px = areaLeft + Math.random() * areaW;
+                const py = areaTop + Math.random() * areaH;
+                s.style.left = px + 'px';
+                s.style.top = py + 'px';
+                // random delay and duration variant by reapplying animation settings
+                const delay = rand(0, 600);
+                s.style.animationDelay = `${delay}ms`;
+                s.style.transform = `translate(-50%,-50%) scale(${rand(0.6, 1.2)})`;
+                // random tiny color tint occasionally
+                if (Math.random() < 0.35) {
+                    const colors = ['#fff7d1', '#ffd4b2', '#ffb3d6', '#c8ffea', '#cdb3ff'];
+                    s.style.background = `radial-gradient(circle at 30% 30%, ${colors[randInt(0, colors.length - 1)]}, transparent 60%), rgba(255,255,255,0.95)`;
+                }
+                sparkles.appendChild(s);
+                // remove each spark after its animation completes (900ms + delay)
+                setTimeout(() => { try { s.remove(); } catch (e) { } }, 1200 + delay);
+            }
+        }
+
+        /* UI wiring */
+        wishBtn.addEventListener('click', () => {
+            const name = (nameInput.value || '').trim();
+            if (!name) {
+                nameInput.focus();
+                nameInput.style.boxShadow = '0 0 0 3px rgba(255,180,80,0.12)';
+                setTimeout(() => nameInput.style.boxShadow = 'none', 600);
+                return;
+            }
+            playSequenceFor(name);
+        });
+
+        backBtn.addEventListener('click', () => {
+            // stop possible timeouts, hide message and show UI
+            hideMessageImmediate();
+            uiPanel.style.display = 'flex';
+            nameInput.focus();
+            // allow wishing again: clear input or keep as per UX (we'll keep the name)
+        });
+
+        /* also allow click on canvas to launch extra rockets */
+        canvas.addEventListener('click', (e) => {
+            // translate click into normalized x coordinate
+            launchAt(e.clientX);
+        });
+
+        /* optional: auto-launch little fireworks every few seconds while idle */
+        let idleTimer = null;
+        function startAutoLaunch() {
+            if (autoLaunchInterval) return;
+            autoLaunchInterval = setInterval(() => {
+                launchAt(rand(80, W - 80));
+            }, 2600);
+        }
+        function stopAutoLaunch() {
+            if (autoLaunchInterval) { clearInterval(autoLaunchInterval); autoLaunchInterval = null; }
+        }
+        startAutoLaunch();
+
+        // keyboard: press Enter in input to wish
+        nameInput.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') {
+                wishBtn.click();
+            }
+        });
+
+        /* Accessibility: if page loses visibility, stop animations moderately */
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) stopAutoLaunch();
+            else startAutoLaunch();
+        });
+    </script>
+</body>
+
+</html>
