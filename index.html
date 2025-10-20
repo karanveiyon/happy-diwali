@@ -49,39 +49,28 @@ button.wish {
   }
 /* ----------- UI bar at bottom ------------- */
 .ui {
-    position: absolute;
-    left: 50%;
-    bottom: 16px;
-    transform: translateX(-50%);
-    z-index: 30;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    width: auto;           /* Allows shrinking on small screens */
-    gap: 10px;
-    align-items: center;
-    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05));
-    padding: 10px 14px;
-    border-radius: 12px;
-    box-shadow: 0 6px 24px rgba(2,2,10,0.6);
-    backdrop-filter: blur(6px);
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: auto;
+  gap: 10px;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05));
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(2,2,10,0.6);
+  backdrop-filter: blur(6px);
 }
-
-/* 🔹 Mobile Optimization */
-@media (max-width: 600px) {
-    .ui {
-        flex-direction: column;   /* Stack items vertically if too tight */
-        gap: 6px;
-        width: 90%;               /* Make it wider for touch-friendly UI */
-        padding: 12px;
-    }
-
-    .ui input, .ui button {       /* If there are input fields/buttons */
-        width: 100%;
-        font-size: 16px;          /* Prevents zoom on iOS */
-    }
+.inp_div {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
 }
-
 
 .ui input, .ui button {
   font-size: 16px;
@@ -193,12 +182,21 @@ canvas#fw {
 /* Responsive tweaks */
 @media (max-width: 600px){
   .ui {
-    flex-direction: column;
-    gap: 6px;
-    width: 90%;
+    /* flex-direction: column; */
+    /* gap: 6px; */
+    width: 100%;
     padding: 12px;
+    
   }
+  .inp_div{
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
 
+    /* gap: 6px; */
+  }
   .ui input, .ui button {
     width: 100%;
     font-size: 16px;
@@ -215,9 +213,13 @@ canvas#fw {
 <body>
   <!-- UI -->
   <div class="ui" id="uiPanel" aria-hidden="false">
-    <input class="name" id="nameInput" placeholder="Enter name to wish" aria-label="Name to wish" />
-    <button class="wish" id="wishBtn" aria-label="Wish">Wish</button>
-    <span class="hint">Share them the screenshots ❤️</span>
+    <div class="inp_div">
+      <input class="name" id="nameInput" placeholder="Enter name to wish" aria-label="Name to wish" />
+      <button class="wish" id="wishBtn" aria-label="Wish">Wish</button>
+    </div>
+    <div class="share_div" style="text-align: center;">
+      <span class="hint">Share them the screenshots ❤️</span>
+    </div>
   </div>
 
   <!-- Canvas for rockets + explosion -->
@@ -531,4 +533,3 @@ document.addEventListener('visibilitychange', ()=>{
 </script>
 </body>
 </html>
-
